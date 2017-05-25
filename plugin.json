@@ -1,0 +1,12 @@
+{
+  "ID":"564F9E5A568F446AA8A7F51C76E712A4",
+  "ActionKeyword":"/steam",
+  "Name":"SteamLAUNCHER",
+  "Description":"A simple steam launcher with python3.",
+  "Author":"Michikora",
+  "Version":"1.0.0",
+  "Language":"python",
+  "Website":"https://twitter.com/michikora",
+  "IcoPath": "icon\\launcher.png",
+  "ExecuteFileName":"launcher.py"
+}
