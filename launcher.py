@@ -6,13 +6,14 @@ import json
 import urllib
 import urllib.request
 import requests
+import codecs
 from bs4 import BeautifulSoup
 
 
 class Steamlauncher(Wox):
 
     gameList = []
-    f = open('./config.json', 'r')
+    f = codecs.open('./config.json', 'r', 'utf-8')
     dirConfig = json.load(f)
     f.close()
 
@@ -33,7 +34,7 @@ class Steamlauncher(Wox):
             for line in acfList:
                 gameId = re.search(r"[0-9]+", line)
                 gameId = gameId.group()
-                f = open(line, 'r')
+                f = codecs.open(line, 'r', 'utf-8')
                 for line in f:
                     if line.find("name") >= 0:
                         gameTitle = line.strip('\n')
@@ -64,7 +65,7 @@ class Steamlauncher(Wox):
         steamappsDir = self.steamappsDir
         gameList = self.gameList
 
-        if not query and steamDir is not None and steamDir is not False and steamappsDir is not None and steamappsDir is not False:
+        if not query and steamDir is not (None and False) and steamappsDir is not (None and False):
             for line in gameList:
                 result.append({
                     "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
@@ -78,7 +79,7 @@ class Steamlauncher(Wox):
                 })
             return result
 
-        if steamDir is not None and steamDir is not False and steamappsDir is not None and steamappsDir is not False:
+        if steamDir is not (None and False) and steamappsDir is not (None and False):
             for line in gameList:
                 if re.match(query.upper(), line['gameTitle'].upper()):
                     result.append({
@@ -151,7 +152,7 @@ class Steamlauncher(Wox):
     def saveSteamDirectory(self, path):
         dirConfig = self.dirConfig
         dirConfig['steam_dir'] = re.sub(r'[/\\]+', '/', path.rstrip('/\\')) + '/'
-        f = open('./config.json', 'w')
+        f = codecs.open('./config.json', 'w', 'utf-8')
         json.dump(dirConfig, f, indent=4)
         f.close()
         WoxAPI.show_msg("Steam directory path has been saved", dirConfig['steam_dir'])
@@ -159,7 +160,7 @@ class Steamlauncher(Wox):
     def saveSteamAppsDirectory(self, path):
         dirConfig = self.dirConfig
         dirConfig['steamapps_dir'] = re.sub(r'[/\\]+', '/', path.rstrip('/\\')) + '/'
-        f = open('./config.json', 'w')
+        f = codecs.open('./config.json', 'w', 'utf-8')
         json.dump(dirConfig, f, indent=4)
         f.close()
         WoxAPI.show_msg("Steam apps directory path has been saved", dirConfig['steamapps_dir'])
