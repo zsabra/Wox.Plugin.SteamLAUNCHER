@@ -46,7 +46,8 @@ class Steamlauncher(Wox):
                 else:
                     try:
                         url = 'https://steamdb.info/app/{}/'.format(gameId)
-                        r = requests.get(url)
+                        headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0"}
+                        r = requests.get(url, headers=headers)
                         soup = BeautifulSoup(r.text, "html.parser")
                         data = soup.find('img', attrs={'class':'app-icon avatar'})
                         img = data.attrs['src']
