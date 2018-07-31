@@ -4,7 +4,7 @@
   "Name":"SteamLAUNCHER",
   "Description":"A simple steam launcher with python3.",
   "Author":"Michikora",
-  "Version":"1.0.3",
+  "Version":"1.1.5",
   "Language":"python",
   "Website":"https://twitter.com/michikora",
   "IcoPath": "icon\\launcher.png",

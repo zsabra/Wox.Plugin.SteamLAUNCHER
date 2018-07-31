@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from wox import Wox, WoxAPI
 import re
+import difflib
 import os, sys, glob
+import subprocess
 import json
 import urllib
 import urllib.request
@@ -32,8 +34,8 @@ class Steamlauncher(Wox):
             steamappsDir = dirConfig["steamapps_dir"]
             acfList = glob.glob(dirConfig['steamapps_dir'] + 'appmanifest_*.acf')
             for line in acfList:
-                gameId = re.search(r"[0-9]+", line)
-                gameId = gameId.group()
+                gameId = re.search(r"[0-9]+.acf", line)
+                gameId = gameId.group().strip(".acf")
                 f = codecs.open(line, 'r', 'utf-8')
                 for line in f:
                     if line.find("name") >= 0:
@@ -82,7 +84,7 @@ class Steamlauncher(Wox):
 
         if steamDir is not (None and False) and steamappsDir is not (None and False):
             for line in gameList:
-                if re.match(query.upper(), line['gameTitle'].upper()):
+                if re.match(query.upper(), line['gameTitle'].upper()) or difflib.SequenceMatcher(None, query.upper(), line['gameTitle'].upper()).ratio() > 0.35:
                     result.append({
                         "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
                         "SubTitle": "Press Enter key to launch '{}'.".format(line['gameTitle']),
@@ -168,8 +170,7 @@ class Steamlauncher(Wox):
 
     def launchGame(self, gameId):
         steamDir = self.steamDir
-        gamePath = '"{}steam.exe"'.format(steamDir) + " -applaunch {}".format(gameId)
-        os.system(gamePath)
+        subprocess.Popen(['{}steam.exe'.format(steamDir), '-applaunch', gameId])
 
 if __name__ == "__main__":
     Steamlauncher()
