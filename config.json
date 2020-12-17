@@ -1,4 +1,4 @@
 {
     "steam_dir": "",
-    "steamapps_dir": ""
+    "steamapps_dir": [""]
 }
