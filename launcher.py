@@ -30,37 +30,38 @@ class Steamlauncher(Wox):
     if not dirConfig["steamapps_dir"]:
         steamappsDir = None
     else:
-        if os.path.isdir(dirConfig['steamapps_dir']) and not not glob.glob(dirConfig['steamapps_dir'] + 'appmanifest_*.acf'):
-            steamappsDir = dirConfig["steamapps_dir"]
-            acfList = glob.glob(dirConfig['steamapps_dir'] + 'appmanifest_*.acf')
-            for line in acfList:
-                gameId = re.search(r"[0-9]+.acf", line)
-                gameId = gameId.group().strip(".acf")
-                f = codecs.open(line, 'r', 'utf-8')
-                for line in f:
-                    if line.find("name") >= 0:
-                        gameTitle = line.strip('\n')
-                        gameTitle = gameTitle[9:].strip('"')
-                        break
-                f.close()
-                if os.path.isfile('./icon/' + gameId + '.jpg'):
-                    gameIcon = './icon/'+ gameId + '.jpg'
-                else:
-                    try:
-                        url = 'https://steamdb.info/app/{}/'.format(gameId)
-                        headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0"}
-                        r = requests.get(url, headers=headers)
-                        soup = BeautifulSoup(r.text, "html.parser")
-                        data = soup.find('img', attrs={'class':'app-icon avatar'})
-                        img = data.attrs['src']
-                        urllib.request.urlretrieve(img, './icon/' + gameId + '.jpg')
+        steamapps_dir = dirConfig["steamapps_dir"]
+        if not isinstance(steamapps_dir, list)
+            steamapps_dir = [steamapps_dir]
+        for steamappsDir in steamapps_dir
+            if os.path.isdir(steamappsDir) and not not glob.glob(steamappsDir + 'appmanifest_*.acf'):
+                acfList = glob.glob(steamappsDir + 'appmanifest_*.acf')
+                for line in acfList:
+                    gameId = re.search(r"[0-9]+.acf", line)
+                    gameId = gameId.group().strip(".acf")
+                    f = codecs.open(line, 'r', 'utf-8')
+                    for line in f:
+                        if line.find("name") >= 0:
+                            gameTitle = line.strip('\n')
+                            gameTitle = gameTitle[9:].strip('"')
+                            break
+                    f.close()
+                    if os.path.isfile('./icon/' + gameId + '.jpg'):
                         gameIcon = './icon/'+ gameId + '.jpg'
-                    except Exception as e:
-                        gameIcon = './icon/missing.png'
-                gameList.append({'gameId':gameId, 'gameTitle':gameTitle, 'gameIcon':gameIcon})
+                    else:
+                        try:
+                            url = 'https://steamdb.info/app/{}/'.format(gameId)
+                            headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0"}
+                            r = requests.get(url, headers=headers)
+                            soup = BeautifulSoup(r.text, "html.parser")
+                            data = soup.find('img', attrs={'class':'app-icon avatar'})
+                            img = data.attrs['src']
+                            urllib.request.urlretrieve(img, './icon/' + gameId + '.jpg')
+                            gameIcon = './icon/'+ gameId + '.jpg'
+                        except Exception as e:
+                            gameIcon = './icon/missing.png'
+                    gameList.append({'gameId':gameId, 'gameTitle':gameTitle, 'gameIcon':gameIcon, steamappsDir: steamappsDir})
 
-        else:
-            steamappsDir = False
 
     def query(self, query):
         result = []
@@ -68,7 +69,7 @@ class Steamlauncher(Wox):
         steamappsDir = self.steamappsDir
         gameList = self.gameList
 
-        if not query and steamDir is not (None and False) and steamappsDir is not (None and False):
+        if not query and steamDir is not (None and False):
             for line in gameList:
                 result.append({
                     "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
@@ -82,7 +83,7 @@ class Steamlauncher(Wox):
                 })
             return result
 
-        if steamDir is not (None and False) and steamappsDir is not (None and False):
+        if steamDir is not (None and False):
             for line in gameList:
                 if re.match(query.upper(), line['gameTitle'].upper()) or difflib.SequenceMatcher(None, query.upper(), line['gameTitle'].upper()).ratio() > 0.35:
                     result.append({
