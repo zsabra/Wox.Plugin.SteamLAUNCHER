@@ -13,8 +13,8 @@ from bs4 import BeautifulSoup
 
 
 class Steamlauncher(Wox):
-
     gameList = []
+    log = []
     f = codecs.open('./config.json', 'r', 'utf-8')
     dirConfig = json.load(f)
     f.close()
@@ -26,17 +26,19 @@ class Steamlauncher(Wox):
             steamDir = dirConfig["steam_dir"]
         else:
             steamDir = False
-
+    print("test")
     if not dirConfig["steamapps_dir"]:
         steamappsDir = None
     else:
         steamapps_dir = dirConfig["steamapps_dir"]
-        if not isinstance(steamapps_dir, list)
+        if not isinstance(steamapps_dir, list):
             steamapps_dir = [steamapps_dir]
-        for steamappsDir in steamapps_dir
+        for steamappsDir in steamapps_dir:
+            addLog(log, steamappsDir)
             if os.path.isdir(steamappsDir) and not not glob.glob(steamappsDir + 'appmanifest_*.acf'):
                 acfList = glob.glob(steamappsDir + 'appmanifest_*.acf')
                 for line in acfList:
+                    addLog(log, line)
                     gameId = re.search(r"[0-9]+.acf", line)
                     gameId = gameId.group().strip(".acf")
                     f = codecs.open(line, 'r', 'utf-8')
@@ -62,96 +64,97 @@ class Steamlauncher(Wox):
                             gameIcon = './icon/missing.png'
                     gameList.append({'gameId':gameId, 'gameTitle':gameTitle, 'gameIcon':gameIcon, steamappsDir: steamappsDir})
 
+    def request(self,url):
+        return
 
     def query(self, query):
-        result = []
         steamDir = self.steamDir
         steamappsDir = self.steamappsDir
-        gameList = self.gameList
+        addLog(self.log, ",".join(map(lambda x: x.gameTitle, self.gameList)))
+        # gameList = self.gameList
+        return self.log 
+        # if not query and steamDir is not (None and False):
+        #     for line in gameList:
+        #         result.append({
+        #             "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
+        #             "SubTitle": "Press Enter key to launch '{}'.".format(line['gameTitle']),
+        #             "IcoPath": line['gameIcon'],
+        #             "JsonRPCAction": {
+        #                 "method": "launchGame",
+        #                 "parameters": [line['gameId']],
+        #                 "dontHideAfterAction": False
+        #             }
+        #         })
+        #     return result
 
-        if not query and steamDir is not (None and False):
-            for line in gameList:
-                result.append({
-                    "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
-                    "SubTitle": "Press Enter key to launch '{}'.".format(line['gameTitle']),
-                    "IcoPath": line['gameIcon'],
-                    "JsonRPCAction": {
-                        "method": "launchGame",
-                        "parameters": [line['gameId']],
-                        "dontHideAfterAction": False
-                    }
-                })
-            return result
+        # if steamDir is not (None and False):
+        #     for line in gameList:
+        #         if re.match(query.upper(), line['gameTitle'].upper()) or difflib.SequenceMatcher(None, query.upper(), line['gameTitle'].upper()).ratio() > 0.35:
+        #             result.append({
+        #                 "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
+        #                 "SubTitle": "Press Enter key to launch '{}'.".format(line['gameTitle']),
+        #                 "IcoPath": line['gameIcon'],
+        #                 "JsonRPCAction": {
+        #                     "method": "launchGame",
+        #                     "parameters": [line['gameId']],
+        #                     "dontHideAfterAction": False
+        #                 }
+        #             })
+        #     if not result:
+        #         result.append({
+        #             "Title": "Can't find '{}'.".format(query),
+        #             "SubTitle": "Please check game has been installed correctly.",
+        #             "IcoPath": "icon/launcher.png",
+        #         })
+        #     return result
 
-        if steamDir is not (None and False):
-            for line in gameList:
-                if re.match(query.upper(), line['gameTitle'].upper()) or difflib.SequenceMatcher(None, query.upper(), line['gameTitle'].upper()).ratio() > 0.35:
-                    result.append({
-                        "Title": line['gameTitle'] + " - ({})".format(line['gameId']),
-                        "SubTitle": "Press Enter key to launch '{}'.".format(line['gameTitle']),
-                        "IcoPath": line['gameIcon'],
-                        "JsonRPCAction": {
-                            "method": "launchGame",
-                            "parameters": [line['gameId']],
-                            "dontHideAfterAction": False
-                        }
-                    })
-            if not result:
-                result.append({
-                    "Title": "Can't find '{}'.".format(query),
-                    "SubTitle": "Please check game has been installed correctly.",
-                    "IcoPath": "icon/launcher.png",
-                })
-            return result
+        # if steamDir is None:
+        #     result.append({
+        #         "Title": "Can't find Steam Directory.",
+        #         "SubTitle": "Please add Steam Path:'{}'".format(query),
+        #         "IcoPath": "icon/launcher.png",
+        #         "JsonRPCAction": {
+        #             "method": "saveSteamDirectory",
+        #             "parameters": [query],
+        #             "dontHideAfterAction": True
+        #         }
+        #     })
 
-        if steamDir is None:
-            result.append({
-                "Title": "Can't find Steam Directory.",
-                "SubTitle": "Please add Steam Path:'{}'".format(query),
-                "IcoPath": "icon/launcher.png",
-                "JsonRPCAction": {
-                    "method": "saveSteamDirectory",
-                    "parameters": [query],
-                    "dontHideAfterAction": True
-                }
-            })
+        # if steamappsDir is None:
+        #     result.append({
+        #         "Title": "Can't find Steamapps Directory.",
+        #         "SubTitle": "Please add Steamapps Path:'{}'".format(query),
+        #         "IcoPath": "icon/launcher.png",
+        #         "JsonRPCAction": {
+        #             "method": "saveSteamAppsDirectory",
+        #             "parameters": [query],
+        #             "dontHideAfterAction": True
+        #         }
+        #     })
 
-        if steamappsDir is None:
-            result.append({
-                "Title": "Can't find Steamapps Directory.",
-                "SubTitle": "Please add Steamapps Path:'{}'".format(query),
-                "IcoPath": "icon/launcher.png",
-                "JsonRPCAction": {
-                    "method": "saveSteamAppsDirectory",
-                    "parameters": [query],
-                    "dontHideAfterAction": True
-                }
-            })
+        # if steamDir is False:
+        #     result.append({
+        #         "Title": "Steam path is invalid.",
+        #         "SubTitle": "Try add Steam Path again:'{}'".format(query),
+        #         "IcoPath": "icon/launcher.png",
+        #         "JsonRPCAction": {
+        #             "method": "saveSteamDirectory",
+        #             "parameters": [query],
+        #             "dontHideAfterAction": True
+        #         }
+        #     })
 
-        if steamDir is False:
-            result.append({
-                "Title": "Steam path is invalid.",
-                "SubTitle": "Try add Steam Path again:'{}'".format(query),
-                "IcoPath": "icon/launcher.png",
-                "JsonRPCAction": {
-                    "method": "saveSteamDirectory",
-                    "parameters": [query],
-                    "dontHideAfterAction": True
-                }
-            })
-
-        if steamappsDir is False:
-            result.append({
-                "Title": "Steamapps path is invalid.",
-                "SubTitle": "Try add Steamapps Path again:'{}'".format(query),
-                "IcoPath": "icon/launcher.png",
-                "JsonRPCAction": {
-                    "method": "saveSteamAppsDirectory",
-                    "parameters": [query],
-                    "dontHideAfterAction": True
-                }
-            })
-        return result
+        # if steamappsDir is False:
+        #     result.append({
+        #         "Title": "Steamapps path is invalid.",
+        #         "SubTitle": "Try add Steamapps Path again:'{}'".format(query),
+        #         "IcoPath": "icon/launcher.png",
+        #         "JsonRPCAction": {
+        #             "method": "saveSteamAppsDirectory",
+        #             "parameters": [query],
+        #             "dontHideAfterAction": True
+        #         }
+        #     })
 
     def saveSteamDirectory(self, path):
         dirConfig = self.dirConfig
@@ -172,6 +175,18 @@ class Steamlauncher(Wox):
     def launchGame(self, gameId):
         steamDir = self.steamDir
         subprocess.Popen(['{}steam.exe'.format(steamDir), '-applaunch', gameId])
+
+ def addLog(self, log, message):
+    log.append({
+        "Title": message,
+                "SubTitle": "log",
+                "IcoPath": "",
+                "JsonRPCAction": {
+                    "method": "launchGame",
+                    "parameters": [""],
+                    "dontHideAfterAction": False
+                }
+    })
 
 if __name__ == "__main__":
     Steamlauncher()
